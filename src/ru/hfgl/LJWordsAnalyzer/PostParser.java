@@ -15,6 +15,7 @@ public class PostParser implements Runnable {
 
     private final LinkedBlockingQueue<String> postLinks;
     private final ConcurrentHashMap<String, Integer> words;
+    private String currentURL;
 
     public PostParser(LinkedBlockingQueue<String> postLinks, ConcurrentHashMap<String, Integer> words) {
         this.postLinks = postLinks;
@@ -25,7 +26,7 @@ public class PostParser implements Runnable {
         while (true) {
             try {
                 log.info("parsing start");
-                String currentURL = postLinks.take();
+                currentURL = postLinks.take();
                 Document doc = Jsoup.connect(currentURL).get();
                 log.info("connected to " + currentURL);
                 Elements el = doc.getElementsByClass("asset-body");
@@ -34,16 +35,20 @@ public class PostParser implements Runnable {
                 log.info("found " + ss.length + " words");
                 for (int i = 0; i < ss.length; i++) {
                     String word = ss[i].toLowerCase().replaceAll("[^А-Яа-яЁёA-Za-z]", "");
-                    Integer count = 1;
-                    if (words.containsKey(word)) count++;
-                    words.put(word, count);
+                    if (!word.equals("")) {
+                        Integer count = 1;
+                        if (words.containsKey(word)) {
+                            count = words.get(word) + 1;
+                        }
+                        words.put(word, count);
+                    }
                 }
                 log.info("words from " + currentURL + " added");
 
             } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                log.error("CAN'T CONNECT TO URL " + currentURL);
             } catch (InterruptedException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                log.info("parser is interrupted");
                 break;
             }
         }

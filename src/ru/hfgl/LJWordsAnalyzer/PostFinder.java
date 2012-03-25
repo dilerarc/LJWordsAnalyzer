@@ -33,14 +33,14 @@ public class PostFinder implements Runnable {
                     postLinks.put(e.children().tagName("a").attr("href"));
                 }
 
-               if (doc.getElementsByClass("skiplinks").first().child(0).text().equals("Next Day")) {
+                if (doc.getElementsByClass("skiplinks").first().child(0).text().equals("Next Day")) {
                     doneFlag = true;
                 }
                 System.gc();
             } catch (IOException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                log.error("CAN'T CONNECT TO URL " + currentURL);
             } catch (InterruptedException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                log.info("finder is interrupted");
             }
         }
     }

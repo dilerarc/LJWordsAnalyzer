@@ -27,8 +27,6 @@
         </layout>
     </appender>
 
-
-
     <root>
         <priority value="DEBUG"/>
         <appender-ref ref="console"/>
