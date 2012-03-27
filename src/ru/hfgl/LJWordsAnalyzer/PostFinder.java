@@ -1,5 +1,6 @@
 package ru.hfgl.LJWordsAnalyzer;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -26,7 +27,7 @@ public class PostFinder implements Runnable {
     public void run() {
         if (!doneFlag) {
             try {
-                log.info("connected to " + currentURL);
+                log.info("connecting to " + currentURL);
                 Document doc = Jsoup.connect(currentURL).get();
                 Elements el = doc.getElementsByClass("page-header2");
                 for (Element e : el) {

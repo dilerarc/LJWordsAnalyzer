@@ -10,10 +10,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,6 +26,7 @@ public class Analyzer {
     private final String ljURL;
     private final LinkedBlockingQueue<String> postLinks = new LinkedBlockingQueue<String>();
     private final ConcurrentHashMap<String, Integer> words = new ConcurrentHashMap<String, Integer>();
+    private Object[] result;
 
     public Analyzer(String ljURL) {
         this.ljURL = ljURL;
@@ -67,14 +68,25 @@ public class Analyzer {
         log.info("Parsing is over");
         log.info("Saving...");
 
-        TreeMap<String, Integer> resultSortedMap = new TreeMap<String, Integer>(new ValueComparator(words));
-        resultSortedMap.putAll(words);
+        sortingResult();
+        saveResult();
 
-        saveResult(resultSortedMap);
-        log.info("Parsing is complete");
+        log.info("All words have found.");
     }
 
-    private void saveResult(Map<String, Integer> resultSortedMap) {
+    private void sortingResult() {
+        result = words.entrySet().toArray();
+        Comparator<Object> comparator = new Comparator<Object>() {
+            public int compare(Object o1, Object o2) {
+                Map.Entry<String, Integer> a = (Map.Entry<String, Integer>)o1;
+                Map.Entry<String, Integer> b = (Map.Entry<String, Integer>)o2;
+                return b.getValue() - a.getValue();
+            }
+        };
+        Arrays.sort(result, comparator);
+    }
+
+    private void saveResult() {
         StringBuilder xml = new StringBuilder();
         xml
                 .append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
@@ -83,14 +95,15 @@ public class Analyzer {
                 .append("words")
                 .append(">")
                 .append(System.lineSeparator());
-        for (String key : resultSortedMap.keySet()) {
+        for (Object obj : result) {
+            Map.Entry<String, Integer> entry = (Map.Entry<String, Integer>)obj;
             xml
                     .append("  <")
-                    .append(key)
+                    .append(entry.getKey())
                     .append(" ")
                     .append("count=")
                     .append("\"")
-                    .append(resultSortedMap.get(key))
+                    .append(entry.getValue())
                     .append("\"")
                     .append("/>")
                     .append(System.lineSeparator());
@@ -107,23 +120,4 @@ public class Analyzer {
             log.error("CANNOT SAVE FILE");
         }
     }
-}
-
-class ValueComparator implements Comparator {
-
-  Map base;
-  public ValueComparator(Map base) {
-      this.base = base;
-  }
-
-  public int compare(Object a, Object b) {
-
-    if((Integer)base.get(a) < (Integer)base.get(b)) {
-      return 1;
-    } else if((Integer)base.get(a) == (Integer)base.get(b)) {
-      return 0;
-    } else {
-      return -1;
-    }
-  }
 }

@@ -1,5 +1,6 @@
 package ru.hfgl.LJWordsAnalyzer;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.xml.sax.SAXException;
@@ -17,5 +18,6 @@ public class Main {
     public static void main(String[] args) throws MalformedURLException, IOException, SAXException, ParserConfigurationException, XPathExpressionException {
         DOMConfigurator.configure("./config/log4j.xml");
         new Analyzer("http://alisomanka.livejournal.com").go();
+        LogManager.shutdown();
     }
 }

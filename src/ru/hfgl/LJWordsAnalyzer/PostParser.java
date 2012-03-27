@@ -1,5 +1,6 @@
 package ru.hfgl.LJWordsAnalyzer;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -28,7 +29,7 @@ public class PostParser implements Runnable {
                 log.info("parsing start");
                 currentURL = postLinks.take();
                 Document doc = Jsoup.connect(currentURL).get();
-                log.info("connected to " + currentURL);
+                log.info("connecting to " + currentURL);
                 Elements el = doc.getElementsByClass("asset-body");
                 String s = el.text().replace("Метки.*", "").trim();
                 String[] ss = s.split("\\s");
